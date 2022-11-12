@@ -17,7 +17,10 @@ trigger TriggerUpdateAvgAmnt on Contact( after insert, after update) {
                 conMap.put(con.AccountId, conList);
             } 
         }   
-        List<Account> acctList =[SELECT Average_Salary__c,(SELECT Salary__c,Prime_Name__c FROM contacts) from Account WHERE Id IN: acctIds];
+        List<Account> acctList =[SELECT Average_Salary__c from Account WHERE Id IN: acctIds];
+         list<account> acAvg = new list<account>();
+         acAvg =[SELECT Average_Salary__c,(SELECT Salary__c,Prime_Name__c, AccountId FROM contacts ) 
+                 from Account WHERE Id IN: acctIds ];
         for(Account acct : acctList){
             List<contact> colist = new List<contact>();
             colist = conMap.get(acct.Id);
@@ -29,18 +32,22 @@ trigger TriggerUpdateAvgAmnt on Contact( after insert, after update) {
             }
             acct.Average_Salary__c  = totalSalary/colist.size();
             updtRcrd.add(acct);
+            if(acct.Average_Salary__c>100000){
+                acAvg.add(acct);
+            }
         }
-       for(Account ac : acctList){
-                 if(ac.Average_Salary__c !=Null && ac.Average_Salary__c>100000){
-                     for(contact c: acctList.contacts){
+         if(acAvg.size()>0){
+            for(Account ac :acAvg){
+                if(ac.Average_Salary__c>100000){
+                 for(contact c: ac.contacts){
                          if(c.Prime_Name__c = false){
                          c.Prime_Name__c = true;
                          updtRcrd.add(c);
                          }
-                     }
                    }
-                     
-           if(updtRcrd.size()>0){
+           }
+            }
+        if(updtRcrd.size()>0){
                update updtRcrd;
            }
             }
