@@ -1,0 +1,51 @@
+trigger TriggerUpdateAvgAmnt on Contact( after insert, after update) {
+
+        if(trigger.isUpdate || trigger.isInsert){
+            Set<Id> acctIds = new Set<Id>();
+            Map<Id,list<contact>> conMap = new map<Id,list<contact>>();
+            List<sObject> updtRcrd = new list<sObject>();
+     
+                  for(Contact con : trigger.New){
+                     if(con.AccountId != null){
+                         acctIds.add(con.AccountId);
+            }
+        }    
+     if(acctIds.size() > 0){
+             List<Contact> conList =[SELECT Salary__c,Prime_Name__c, AccountId FROM contact WHERE AccountId IN : acctIds];
+             for(Contact con : conList){
+             if(!conMap.containsKey(con.AccountId)){
+                conMap.put(con.AccountId, conList);
+            } 
+        }   
+        List<Account> acctList =[SELECT Average_Salary__c FROM Account WHERE Id IN: acctIds];
+        for(Account acct : acctList){
+            List<contact> colist = new List<contact>();
+            colist = conMap.get(acct.Id);
+            Double totalSalary = 0;
+            for(Contact co : colist){
+                if(co.Salary__c != null){
+                    totalSalary += co.Salary__c;
+                }
+            }
+            acct.Average_Salary__c  = totalSalary/colist.size();
+            updtRcrd.add(acct);
+        }
+       for(Account ac : acctList){
+                 if(ac.Average_Salary__c ==Null && ac.Average_Salary__c>100000){
+                     for(contact c: conlist){
+                         if(c.Prime_Name__c = false){
+                         c.Prime_Name__c = true;
+                         updtRcrd.add(c);
+                         }
+                     }
+                   }
+                     
+           if(updtRcrd.size()>0){
+               update updtRcrd;
+           }
+            }
+    
+    
+    }
+}
+}
