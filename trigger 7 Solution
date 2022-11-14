@@ -1,0 +1,34 @@
+trigger contactFieldUpdate on Contact(after insert) {
+    
+       set<id> setOfId = new set<id>();
+     list<user> newUser = new list<user>();
+    Profile pf =[select id from profile where Name = 'System Administrator'];
+    
+    for(contact con : trigger.new){
+        if(!con.AccountId= null){
+            setOfId.add(con.AccountId);
+        }
+    }
+      
+  List<Account> accList = [SELECT Id, Name, Average_Salary__c, 
+                           (SELECT ID, Name, Salary__c, Prime_Name__c from Contacts)
+                           from Account WHERE Id in:setOfId];
+    for(Account acc : accList){
+        if(acc.Average_Salary__c >100000){
+            for(contact con :acc.contacts){
+                if(con.Salary__c<20000 && con.Prime_Name__c == true){
+                    con.Prime_Name__c = false;
+                    User usr = new User();
+                    usr.FirstName = con.FirstName;
+                    usr.LastName = con.LastName;
+                    usr.Email = con.Email;
+                    usr.ProfileId = pf.id;
+                    newUser.add(usr);
+                }
+            }
+        }
+    }
+    if(newUser.size()>0){
+        Insert newUser;
+    }
+}
