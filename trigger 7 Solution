@@ -4,9 +4,9 @@ trigger contactFieldUpdate on Contact(after insert) {
      list<user> newUser = new list<user>();
     Profile pf =[select id from profile where Name = 'System Administrator'];
     
-    for(contact con : trigger.new){
+    for(contact co : trigger.new){
         if(!con.AccountId= null){
-            setOfId.add(con.AccountId);
+            setOfId.add(co.AccountId);
         }
     }
       
