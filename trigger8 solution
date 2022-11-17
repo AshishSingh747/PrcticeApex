@@ -1,14 +1,11 @@
 trigger createTask on Contact (after insert) {
    List<Task> CreateTsk = new List <Task>();
-    set<id> accStId = new set <id>();
     for(contact con:trigger.new){
         if(con.AccountId != null){
-               account acc =new account();
-              acc.id = con.AccountId;
                 Task tsk = new Task();
                 tsk.Subject = 'Meeting';
-                tsk.OwnerId = acc.OwnerId;
-                 tsk.What.id = acc.Id;
+                tsk.OwnerId = con.OwnerId;
+                 tsk.What.id = con.Id;
                 CreateTsk.add(tsk);    
         }
     }
