@@ -5,7 +5,7 @@ trigger createTask on Contact (after insert) {
                 Task tsk = new Task();
                 tsk.Subject = 'Meeting';
                 tsk.OwnerId = con.OwnerId;
-                 tsk.What.id = con.Id;
+                 tsk.What.id = con.AccountId;
                 CreateTsk.add(tsk);    
         }
     }
